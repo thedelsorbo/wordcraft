@@ -11,7 +11,7 @@ on:
         default: "0.6.2-dev"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows-x64:
@@ -58,3 +58,11 @@ jobs:
           name: wordcraft-windows-x64
           path: dist/release/*
           retention-days: 14
+
+      - name: Publish as a release in this fork
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "dev-${{ github.run_number }}"
+          gh release create $tag (Get-ChildItem dist/release -File).FullName --repo ${{ github.repository }} --target ${{ github.sha }} --prerelease --title "WordCraft ${{ inputs.version }} (Windows dev build $tag)" --notes "Unsigned Windows x64 build from main, with the Print dialog listing the system printers."
